@@ -1,4 +1,4 @@
-package edu.pe.cibertec.infracciones.impl;
+package edu.pe.cibertec.infracciones.service.impl;
 
 import edu.pe.cibertec.infracciones.exception.InfractorBloqueadoException;
 import edu.pe.cibertec.infracciones.exception.MultaNotFoundException;
