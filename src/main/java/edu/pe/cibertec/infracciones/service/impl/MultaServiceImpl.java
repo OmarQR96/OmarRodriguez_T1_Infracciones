@@ -4,10 +4,14 @@ import edu.pe.cibertec.infracciones.dto.MultaRequestDTO;
 import edu.pe.cibertec.infracciones.dto.MultaResponseDTO;
 import edu.pe.cibertec.infracciones.exception.*;
 import edu.pe.cibertec.infracciones.model.*;
-import edu.pe.cibertec.infracciones.repository.*;
+import edu.pe.cibertec.infracciones.repository.InfractorRepository;
+import edu.pe.cibertec.infracciones.repository.MultaRepository;
+import edu.pe.cibertec.infracciones.repository.TipoInfraccionRepository;
+import edu.pe.cibertec.infracciones.repository.VehiculoRepository;
 import edu.pe.cibertec.infracciones.service.IMultaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +24,7 @@ public class MultaServiceImpl implements IMultaService {
     private final MultaRepository multaRepository;
     private final InfractorRepository infractorRepository;
     private final VehiculoRepository vehiculoRepository;
+
     private final TipoInfraccionRepository tipoInfraccionRepository;
 
     @Override
@@ -93,6 +98,43 @@ public class MultaServiceImpl implements IMultaService {
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public MultaResponseDTO transferirMulta(Long multaId, Long nuevoInfractorId) {
+        //  Validar quee la multa  existe
+        Multa multa = multaRepository.findById(multaId)
+                .orElseThrow(() -> new MultaNotFoundException(multaId));
+
+        //Validar  que la multa esta en estado PENDIENTE
+        if (multa.getEstado() != EstadoMulta.PENDIENTE) {
+            throw new IllegalStateException(
+                    "Solo se pueden transferir multas en estado PENDIENTE");
+        }
+
+        //  Validar que el nuevo infractor existee
+        Infractor nuevoInfractor = infractorRepository.findById(nuevoInfractorId)
+                .orElseThrow(() -> new InfractorNotFoundException(nuevoInfractorId));
+
+        // 4Validar que el nuevo infractor noo está bloqueado
+        if (nuevoInfractor.isBloqueado()) {
+            throw new InfractorBloqueadoException(nuevoInfractorId);
+        }
+
+        // Validar que el vehículo de la multa pertenece al nuevo infractorxd
+        Vehiculo vehiculoMulta = multa.getVehiculo();
+        boolean vehiculoAsignado = nuevoInfractor.getVehiculos().stream()
+                .anyMatch(v -> v.getId().equals(vehiculoMulta.getId()));
+
+        if (!vehiculoAsignado) {
+            throw new VehiculoNotFoundException(vehiculoMulta.getId());
+        }
+
+
+        multa.setInfractor(nuevoInfractor);
+        Multa multaActualizada = multaRepository.save(multa);
+
+        return mapToResponse(multaActualizada);
     }
 
     private MultaResponseDTO mapToResponse(Multa multa) {
