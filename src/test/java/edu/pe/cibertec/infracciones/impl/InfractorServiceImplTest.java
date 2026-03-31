@@ -58,7 +58,7 @@ class InfractorServiceImplTest {
         vehiculo.setAnio(2020);
         vehiculo.setSuspendido(false);
 
-        // Configurar infractor - USAR ArrayList para lista mutable
+
         infractor = new Infractor();
         infractor.setId(1L);
         infractor.setDni("12345678");
@@ -66,9 +66,9 @@ class InfractorServiceImplTest {
         infractor.setApellido("Pérez");
         infractor.setEmail("juan.perez@mail.com");
         infractor.setBloqueado(false);
-        infractor.setVehiculos(new ArrayList<>(List.of(vehiculo))); // ✅ CORREGIDO
+        infractor.setVehiculos(new ArrayList<>(List.of(vehiculo)));
 
-        // Configurar multa PENDIENTE (monto 200.00)
+
         multaPendiente = new Multa();
         multaPendiente.setId(1L);
         multaPendiente.setCodigo("MUL-001");
@@ -89,9 +89,7 @@ class InfractorServiceImplTest {
         multaVencida.setInfractor(infractor);
     }
 
-    // ========================================================================
-    // PREGUNTA 1: CALCULAR DEUDA
-    // ========================================================================
+    //pregunta1
     @Test
     @DisplayName("Should calculate debt successfully when infractor has PENDING and VENCIDA fines")
     void shouldCalculateDeudaSuccessfully() {
@@ -100,10 +98,9 @@ class InfractorServiceImplTest {
         when(multaRepository.findByInfractor_IdAndEstadoIn(eq(1L), any(List.class)))
                 .thenReturn(List.of(multaPendiente, multaVencida));
 
-        // WHEN
-        Double deuda = infractorService.calcularDeuda(1L);
 
-        // THEN - 200 + (300 * 1.15) = 545.00
+
+        Double deuda = infractorService.calcularDeuda(1L);
         assertNotNull(deuda);
         assertEquals(545.00, deuda);
         verify(multaRepository, times(1))
@@ -113,10 +110,11 @@ class InfractorServiceImplTest {
     @Test
     @DisplayName("Should throw exception when infractor not found")
     void shouldThrowExceptionWhenInfractorNotFound() {
-        // GIVEN
+
+
+
         when(infractorRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // WHEN & THEN
         assertThrows(InfractorNotFoundException.class, () -> {
             infractorService.calcularDeuda(99L);
         });
@@ -125,32 +123,28 @@ class InfractorServiceImplTest {
     @Test
     @DisplayName("Should return 0.0 when infractor has no fines")
     void shouldReturnZeroWhenNoFines() {
-        // GIVEN
         when(infractorRepository.findById(1L)).thenReturn(Optional.of(infractor));
         when(multaRepository.findByInfractor_IdAndEstadoIn(eq(1L), any(List.class)))
                 .thenReturn(List.of());
 
-        // WHEN
+
+
         Double deuda = infractorService.calcularDeuda(1L);
 
-        // THEN
         assertEquals(0.0, deuda);
     }
 
-    // ========================================================================
-    // PREGUNTA 2: DESASIGNAR VEHÍCULO
-    // ========================================================================
+   //pregunta 2
     @Test
     @DisplayName("Should unassign vehicle successfully when no PENDING fines")
     void shouldDesasignarVehiculoSuccessfully() {
-        // GIVEN
+
         when(infractorRepository.findById(1L)).thenReturn(Optional.of(infractor));
         when(vehiculoRepository.findById(1L)).thenReturn(Optional.of(vehiculo));
         when(multaRepository.countByVehiculo_IdAndEstado(1L, EstadoMulta.PENDIENTE))
                 .thenReturn(0L);
         when(infractorRepository.save(any(Infractor.class))).thenReturn(infractor);
 
-        // WHEN & THEN
         assertDoesNotThrow(() -> {
             infractorService.desasignarVehiculo(1L, 1L);
         });
@@ -161,16 +155,16 @@ class InfractorServiceImplTest {
     @Test
     @DisplayName("Should throw exception when vehicle has PENDING fines")
     void shouldThrowExceptionWhenVehicleHasPendingFines() {
-        // GIVEN
+
         when(infractorRepository.findById(1L)).thenReturn(Optional.of(infractor));
         when(vehiculoRepository.findById(1L)).thenReturn(Optional.of(vehiculo));
         when(multaRepository.countByVehiculo_IdAndEstado(1L, EstadoMulta.PENDIENTE))
                 .thenReturn(2L);
 
-        // WHEN & THEN
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             infractorService.desasignarVehiculo(1L, 1L);
         });
+
 
         assertTrue(exception.getMessage().contains("multa(s) pendiente(s)"));
         verify(infractorRepository, never()).save(any(Infractor.class));
