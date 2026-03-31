@@ -1,0 +1,93 @@
+// =============================================
+// SISTEMA DE GESTIÓN DE INFRACCIONES DE TRÁNSITO
+// Archivo de pruebas para Swagger UI
+// IMPORTANTE: Esta data es adicional al data.sql
+// =============================================
+
+// ---------------------------------------------
+// 1. REGISTRAR INFRACTOR
+// POST /api/infractores
+// ---------------------------------------------
+{
+  "dni": "55667788",
+  "nombre": "Pedro",
+  "apellido": "Mendoza",
+  "email": "pedro.mendoza@mail.com"
+}
+
+// ---------------------------------------------
+// 2. REGISTRAR OTRO INFRACTOR
+// POST /api/infractores
+// ---------------------------------------------
+{
+  "dni": "99001122",
+  "nombre": "Rosa",
+  "apellido": "Villanueva",
+  "email": "rosa.villanueva@mail.com"
+}
+
+// ---------------------------------------------
+// 3. REGISTRAR VEHÍCULO
+// POST /api/vehiculos
+// ---------------------------------------------
+{
+  "placa": "MNO-345",
+  "marca": "Kia",
+  "anio": 2023
+}
+
+// ---------------------------------------------
+// 4. REGISTRAR OTRO VEHÍCULO
+// POST /api/vehiculos
+// ---------------------------------------------
+{
+  "placa": "PQR-678",
+  "marca": "Suzuki",
+  "anio": 2022
+}
+
+// ---------------------------------------------
+// 5. ASIGNAR VEHÍCULO A INFRACTOR
+// POST /api/infractores/{infractorId}/vehiculos/{vehiculoId}
+// Ejemplo: POST /api/infractores/4/vehiculos/4
+// No requiere body
+// ---------------------------------------------
+
+// ---------------------------------------------
+// 6. REGISTRAR MULTA CON 2 TIPOS DE INFRACCIÓN
+// POST /api/multas
+// ---------------------------------------------
+{
+  "infractorId": 4,
+  "vehiculoId": 4,
+  "tiposInfraccionIds": [1, 4]
+}
+
+// ---------------------------------------------
+// 7. REGISTRAR MULTA CON INFRACCIÓN GRAVE
+// POST /api/multas
+// ---------------------------------------------
+{
+  "infractorId": 5,
+  "vehiculoId": 5,
+  "tiposInfraccionIds": [2, 3]
+}
+
+// ---------------------------------------------
+// 8. PROCESAR PAGO CON DESCUENTO (dentro de 5 días)
+// POST /api/pagos/{multaId}
+// Ejemplo: POST /api/pagos/4
+// No requiere body
+// ---------------------------------------------
+
+// ---------------------------------------------
+// 9. CONSULTAR MULTAS POR INFRACTOR
+// GET /api/multas/infractor/{infractorId}
+// Ejemplo: GET /api/multas/infractor/4
+// ---------------------------------------------
+
+// ---------------------------------------------
+// 10. CONSULTAR PAGOS POR INFRACTOR
+// GET /api/pagos/infractor/{infractorId}
+// Ejemplo: GET /api/pagos/infractor/4
+// ---------------------------------------------
